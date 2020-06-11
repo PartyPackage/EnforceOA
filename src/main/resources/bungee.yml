@@ -2,3 +2,4 @@ name: EnforceOA
 main: tk.fatpackage.enforceoa.bungee.BungeeEnforceOA
 version: 1.0
 author: VacantFuture
+depends: [OpenAudioMc]

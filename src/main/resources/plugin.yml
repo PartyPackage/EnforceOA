@@ -2,3 +2,4 @@ name: EnforceOA
 main: tk.fatpackage.enforceoa.spigot.SpigotEnforceOA
 version: 1.0
 authors: [VacantFuture]
+depend: [OpenAudioMc]

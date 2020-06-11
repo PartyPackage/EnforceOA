@@ -11,7 +11,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class OAConnectionListener implements Listener {
 
-    private SpigotEnforceOA plugin = SpigotEnforceOA.getInstance();
     private boolean isUnderBungee = SpigotEnforceOA.getInstance().isUnderBungee();
     private PlayerManager pm = PlayerManager.getInstance();
 

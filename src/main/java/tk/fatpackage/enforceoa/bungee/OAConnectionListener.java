@@ -27,6 +27,7 @@ public class OAConnectionListener implements Listener {
     private void sendConnectionStatus(ProxiedPlayer p, boolean bool) {
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("ConnectedToAudio");
+        out.writeUTF(p.getUniqueId().toString());
         out.writeBoolean(bool);
         p.getServer().getInfo().sendData("enforceoa:channel", out.toByteArray());
     }

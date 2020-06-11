@@ -49,9 +49,6 @@ public class PlayerManager {
     }
 
     public void enablePlayer(Player p) {
-        if (p.hasPermission("enforceoa.bypass")) {
-            return;
-        }
         p.removePotionEffect(PotionEffectType.BLINDNESS);
         p.removePotionEffect(PotionEffectType.SLOW_DIGGING);
         p.removePotionEffect(PotionEffectType.SLOW);

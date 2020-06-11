@@ -14,6 +14,8 @@ public class PlayerManager {
     private SpigotEnforceOA plugin = SpigotEnforceOA.getInstance();
     public List<Player> disabledPlayers = new ArrayList<>();
     public Map<Player, BukkitTask> taskMap = new HashMap<>();
+    private long kickDelay = plugin.getConfig().getInt("kick-delay-seconds") * 20;
+    private String kickMsg = plugin.getConfig().getString("kick-msg");
     private Collection<PotionEffect> potionEffects = Arrays.asList(
             new PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0, true, false),
             new PotionEffect(PotionEffectType.SLOW_DIGGING, Integer.MAX_VALUE, 128, true, false),
@@ -41,9 +43,9 @@ public class PlayerManager {
             BukkitTask task = new BukkitRunnable() {
                 @Override
                 public void run() {
-                    p.kickPlayer("Connect to the audio client by doing /audio and clicking the link in chat!");
+                    p.kickPlayer(kickMsg);
                 }
-            }.runTaskLater(plugin, 1800L); // kick after 1.5 minutes
+            }.runTaskLater(plugin, kickDelay); // kick after 1.5 minutes
             taskMap.putIfAbsent(p, task);
         }
     }

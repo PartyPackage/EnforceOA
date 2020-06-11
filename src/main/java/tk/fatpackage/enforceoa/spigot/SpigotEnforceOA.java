@@ -11,6 +11,7 @@ public class SpigotEnforceOA extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        saveDefaultConfig();
         if ( !getServer().getVersion().contains("Spigot") && !getServer().getVersion().contains("Paper")) {
             getLogger().severe( "You probably run CraftBukkit... Please update atleast to spigot for this to work..." );
             getLogger().severe( "Plugin disabled!" );
@@ -25,7 +26,4 @@ public class SpigotEnforceOA extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new OAConnectionListener(), this);
     }
 
-    public void log(String msg) {
-        getLogger().info(msg);
-    }
 }

@@ -17,12 +17,10 @@ public class SpigotEnforceOA extends JavaPlugin {
             getServer().getPluginManager().disablePlugin( this );
             return;
         }
-        //isUnderBungee = getServer().spigot().getConfig().getConfigurationSection("settings").getBoolean("settings.bungeecord");
         isUnderBungee = !getServer().getOnlineMode();
         if (isUnderBungee) {
             getLogger().info("BungeeCord detected, enabling BungeeCord support");
             getServer().getMessenger().registerIncomingPluginChannel(this, "enforceoa:channel", new CustomPluginMessageListener());
-            getServer().getMessenger().registerOutgoingPluginChannel(this, "enforceoa:channel");
         }
         getServer().getPluginManager().registerEvents(new OAConnectionListener(), this);
     }

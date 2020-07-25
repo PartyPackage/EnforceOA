@@ -59,6 +59,10 @@ public class PlayerManager {
     }
 
     public void disablePlayer(Player p, String url) {
+        if (p.hasPermission("enforceoa.bypass")) {
+            return;
+        }
+
         disablePlayer(p);
 
         // async generate qr code

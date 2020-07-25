@@ -1,6 +1,12 @@
 package tk.fatpackage.enforceoa.spigot;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.MapMeta;
+import org.bukkit.map.MapRenderer;
+import org.bukkit.map.MapView;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -12,16 +18,14 @@ public class PlayerManager {
 
     private static PlayerManager pm;
     private SpigotEnforceOA plugin = SpigotEnforceOA.getInstance();
-    public List<Player> disabledPlayers = new ArrayList<>();
+    public Map<Player, PlayerInventoryEquipment> disabledPlayers = new HashMap<>();
     public Map<Player, BukkitTask> taskMap = new HashMap<>();
     private long kickDelay = plugin.getConfig().getInt("kick-delay-seconds") * 20;
     private String kickMsg = plugin.getConfig().getString("kick-msg");
     private Collection<PotionEffect> potionEffects = Arrays.asList(
             new PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0, true, false),
-            new PotionEffect(PotionEffectType.SLOW_DIGGING, Integer.MAX_VALUE, 128, true, false),
             new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 128, true, false),
-            new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 128, true, false),
-            new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, true, false));
+            new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, 128, true, false));
 
     public static PlayerManager getInstance() {
         if (pm == null) {
@@ -37,8 +41,12 @@ public class PlayerManager {
             return;
         }
 
-        if (!disabledPlayers.contains(p)) {
-            disabledPlayers.add(p);
+        if (!disabledPlayers.containsKey(p)) {
+            ItemStack[] inv = p.getInventory().getContents();
+            ItemStack[] equip = p.getInventory().getArmorContents();
+            ItemStack[] extra = p.getInventory().getExtraContents();
+            disabledPlayers.put(p, new PlayerInventoryEquipment(inv, equip, extra));
+            p.getInventory().clear();
             p.addPotionEffects(potionEffects);
             BukkitTask task = new BukkitRunnable() {
                 @Override
@@ -50,17 +58,45 @@ public class PlayerManager {
         }
     }
 
+    public void disablePlayer(Player p, String url) {
+        disablePlayer(p);
+
+        // async generate qr code
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+            MapView view = Bukkit.createMap(p.getWorld());
+
+            // sync give item
+            plugin.getServer().getScheduler().runTask(plugin, () -> {
+                ItemStack item = new ItemStack(Material.MAP, 1, view.getId());
+                MapMeta meta = (MapMeta) item.getItemMeta();
+                view.setScale(MapView.Scale.NORMAL);
+                view.setUnlimitedTracking(false);
+                view.getRenderers().clear();
+                MapRenderer renderer = new QRMapRenderer(url);
+                view.addRenderer(renderer);
+                item.setItemMeta(meta);
+                p.getInventory().setItem(4, item);
+                p.getInventory().setHeldItemSlot(4);
+            });
+        });
+    }
+
     public void enablePlayer(Player p) {
-        p.removePotionEffect(PotionEffectType.BLINDNESS);
-        p.removePotionEffect(PotionEffectType.SLOW_DIGGING);
-        p.removePotionEffect(PotionEffectType.SLOW);
-        p.removePotionEffect(PotionEffectType.JUMP);
-        p.removePotionEffect(PotionEffectType.INVISIBILITY);
+        if (!disabledPlayers.containsKey(p)) {
+            return;
+        }
+        potionEffects.forEach(potionEffect -> {
+            p.removePotionEffect(potionEffect.getType());
+        });
+        p.getInventory().clear();
+        PlayerInventoryEquipment playerInventoryEquipment = disabledPlayers.get(p);
+        p.getInventory().setContents(playerInventoryEquipment.getInv());
+        p.getInventory().setArmorContents(playerInventoryEquipment.getEquip());
+        p.getInventory().setExtraContents(playerInventoryEquipment.getExtra());
         disabledPlayers.remove(p);
         if (taskMap.containsKey(p)) {
             taskMap.get(p).cancel();
             taskMap.remove(p);
         }
     }
-
 }

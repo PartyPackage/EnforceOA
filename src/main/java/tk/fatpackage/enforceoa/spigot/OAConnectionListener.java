@@ -1,18 +1,22 @@
 package tk.fatpackage.enforceoa.spigot;
 
+import com.craftmend.openaudiomc.OpenAudioMc;
+import com.craftmend.openaudiomc.generic.objects.OpenAudioApi;
 import com.craftmend.openaudiomc.spigot.modules.players.events.ClientConnectEvent;
 import com.craftmend.openaudiomc.spigot.modules.players.events.ClientDisconnectEvent;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.*;
+import tk.fatpackage.enforceoa.generic.OAUtil;
 
 public class OAConnectionListener implements Listener {
 
     private boolean isUnderBungee = SpigotEnforceOA.getInstance().isUnderBungee();
     private PlayerManager pm = PlayerManager.getInstance();
+    private OpenAudioApi openAudioApi = OpenAudioMc.getApi();
 
     @EventHandler
     public void onClientConnect(ClientConnectEvent e) {
@@ -21,14 +25,20 @@ public class OAConnectionListener implements Listener {
 
     @EventHandler
     public void onClientDisconnect(ClientDisconnectEvent e) {
-        pm.disablePlayer(e.getPlayer());
+        if (!isUnderBungee) {
+            Player p = e.getPlayer();
+            String url = OAUtil.getInstance().getOldURL(openAudioApi.getClient(p.getUniqueId()));
+            pm.disablePlayer(p, url);
+        }
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         if (!isUnderBungee) {
             // standalone server, so they can't possibly be connected to the audio client yet
-            pm.disablePlayer(e.getPlayer());
+            Player p = e.getPlayer();
+            String url = OAUtil.getInstance().getOldURL(openAudioApi.getClient(p.getUniqueId()));
+            pm.disablePlayer(p, url);
         }
     }
 
@@ -39,16 +49,44 @@ public class OAConnectionListener implements Listener {
 
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent e) {
-        if (pm.disabledPlayers.contains(e.getPlayer())) {
+        if (pm.disabledPlayers.containsKey(e.getPlayer())) {
             e.setCancelled(true);
         } else {
-            e.getRecipients().removeAll(pm.disabledPlayers);
+            e.getRecipients().removeAll(pm.disabledPlayers.keySet());
+        }
+    }
+
+    @EventHandler
+    public void onDropItem(PlayerDropItemEvent e) {
+        if (pm.disabledPlayers.containsKey(e.getPlayer())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent e) {
+        if (pm.disabledPlayers.containsKey(e.getWhoClicked())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent e) {
+        if (pm.disabledPlayers.containsKey(e.getWhoClicked())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onSlotSelect(PlayerItemHeldEvent e) {
+        if (pm.disabledPlayers.containsKey(e.getPlayer()) && e.getNewSlot() != 4) {
+            e.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
-        if (pm.disabledPlayers.contains(e.getPlayer())) {
+        if (pm.disabledPlayers.containsKey(e.getPlayer())) {
             e.setCancelled(true);
         }
     }

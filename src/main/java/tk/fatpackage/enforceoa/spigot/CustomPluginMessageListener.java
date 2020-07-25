@@ -23,10 +23,15 @@ public class CustomPluginMessageListener implements PluginMessageListener {
         if (subChannel.equalsIgnoreCase("ConnectedToAudio")) {
             Player p = Bukkit.getPlayer(UUID.fromString(in.readUTF()));
             boolean isConnected = in.readBoolean();
+            String url = in.readUTF();
             if (isConnected) {
                 pm.enablePlayer(p);
             } else {
-                pm.disablePlayer(p);
+                if (url.equals("")) {
+                    pm.disablePlayer(p);
+                } else {
+                    pm.disablePlayer(p, url);
+                }
             }
         }
     }

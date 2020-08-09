@@ -1,7 +1,6 @@
 package tk.fatpackage.enforceoa.spigot;
 
 import com.craftmend.openaudiomc.OpenAudioMc;
-import com.craftmend.openaudiomc.generic.objects.OpenAudioApi;
 import com.craftmend.openaudiomc.spigot.modules.players.events.ClientConnectEvent;
 import com.craftmend.openaudiomc.spigot.modules.players.events.ClientDisconnectEvent;
 import org.bukkit.entity.Player;
@@ -16,7 +15,7 @@ public class OAConnectionListener implements Listener {
 
     private boolean isUnderBungee = SpigotEnforceOA.getInstance().isUnderBungee();
     private PlayerManager pm = PlayerManager.getInstance();
-    private OpenAudioApi openAudioApi = OpenAudioMc.getApi();
+    private OpenAudioMc openAudioMc = OpenAudioMc.getInstance();
 
     @EventHandler
     public void onClientConnect(ClientConnectEvent e) {
@@ -27,7 +26,7 @@ public class OAConnectionListener implements Listener {
     public void onClientDisconnect(ClientDisconnectEvent e) {
         if (!isUnderBungee) {
             Player p = e.getPlayer();
-            String url = OAUtil.getInstance().getOldURL(openAudioApi.getClient(p.getUniqueId()));
+            String url = OAUtil.getInstance().getOldURL(openAudioMc.getNetworkingService().getClient(p.getUniqueId()));
             pm.disablePlayer(p, url);
         }
     }
@@ -37,7 +36,7 @@ public class OAConnectionListener implements Listener {
         if (!isUnderBungee) {
             // standalone server, so they can't possibly be connected to the audio client yet
             Player p = e.getPlayer();
-            String url = OAUtil.getInstance().getOldURL(openAudioApi.getClient(p.getUniqueId()));
+            String url = OAUtil.getInstance().getOldURL(openAudioMc.getNetworkingService().getClient(p.getUniqueId()));
             pm.disablePlayer(p, url);
         }
     }

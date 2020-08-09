@@ -27,7 +27,7 @@
                     <relocations>
                         <relocation>
                             <pattern>com.google.zxing</pattern>
-                            <shadedPattern>tk.fatpackage.enforceoa.spigot</shadedPattern>
+                            <shadedPattern>com.google.zxing</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
@@ -79,7 +79,7 @@
         <dependency>
             <groupId>com.craftmend.openaudiomc</groupId>
             <artifactId>OpenAudioMc</artifactId>
-            <version>LATEST</version>
+            <version>6.3.5</version>
             <scope>provided</scope>
         </dependency>
 

@@ -71,13 +71,14 @@ public class PlayerManager {
 
             // sync give item
             plugin.getServer().getScheduler().runTask(plugin, () -> {
-                ItemStack item = new ItemStack(Material.MAP, 1, view.getId());
+                ItemStack item = new ItemStack(Material.FILLED_MAP);
                 MapMeta meta = (MapMeta) item.getItemMeta();
                 view.setScale(MapView.Scale.NORMAL);
                 view.setUnlimitedTracking(false);
                 view.getRenderers().clear();
                 MapRenderer renderer = new QRMapRenderer(url);
                 view.addRenderer(renderer);
+                meta.setMapView(view);
                 item.setItemMeta(meta);
                 p.getInventory().setItem(4, item);
                 p.getInventory().setHeldItemSlot(4);

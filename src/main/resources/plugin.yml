@@ -3,6 +3,7 @@ main: tk.fatpackage.enforceoa.spigot.SpigotEnforceOA
 version: 1.0
 authors: [VacantFuture]
 depend: [OpenAudioMc]
+api-version: 1.16
 permissions:
   enforceoa.bypass:
     description: Allows you to bypass being required to open the audio client

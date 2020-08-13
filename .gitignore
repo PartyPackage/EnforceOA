@@ -2,3 +2,4 @@
 /target/
 /.idea/
 /EnforceOA.iml
+/dependency-reduced-pom.xml

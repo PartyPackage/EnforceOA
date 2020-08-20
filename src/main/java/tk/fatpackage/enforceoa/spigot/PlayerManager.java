@@ -65,25 +65,27 @@ public class PlayerManager {
 
         disablePlayer(p);
 
-        // async generate qr code
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
-            MapView view = Bukkit.createMap(p.getWorld());
+        if (isFloodgatePlayer(p)) {
+            // async generate qr code
+            plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+                MapView view = Bukkit.createMap(p.getWorld());
 
-            // sync give item
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
-                ItemStack item = new ItemStack(Material.FILLED_MAP);
-                MapMeta meta = (MapMeta) item.getItemMeta();
-                view.setScale(MapView.Scale.NORMAL);
-                view.setUnlimitedTracking(false);
-                view.getRenderers().clear();
-                MapRenderer renderer = new QRMapRenderer(url);
-                view.addRenderer(renderer);
-                meta.setMapView(view);
-                item.setItemMeta(meta);
-                p.getInventory().setItem(4, item);
-                p.getInventory().setHeldItemSlot(4);
+                // sync give item
+                plugin.getServer().getScheduler().runTask(plugin, () -> {
+                    ItemStack item = new ItemStack(Material.FILLED_MAP);
+                    MapMeta meta = (MapMeta) item.getItemMeta();
+                    view.setScale(MapView.Scale.NORMAL);
+                    view.setUnlimitedTracking(false);
+                    view.getRenderers().clear();
+                    MapRenderer renderer = new QRMapRenderer(url);
+                    view.addRenderer(renderer);
+                    meta.setMapView(view);
+                    item.setItemMeta(meta);
+                    p.getInventory().setItem(4, item);
+                    p.getInventory().setHeldItemSlot(4);
+                });
             });
-        });
+        }
     }
 
     public void enablePlayer(Player p) {
@@ -103,5 +105,9 @@ public class PlayerManager {
             taskMap.get(p).cancel();
             taskMap.remove(p);
         }
+    }
+
+    public boolean isFloodgatePlayer(Player p) {
+        return p.getUniqueId().getMostSignificantBits() == 0;
     }
 }

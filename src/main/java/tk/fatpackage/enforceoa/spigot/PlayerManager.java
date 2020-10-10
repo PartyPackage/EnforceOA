@@ -40,22 +40,24 @@ public class PlayerManager {
         if (p.hasPermission("enforceoa.bypass")) {
             return;
         }
-
-        if (!disabledPlayers.containsKey(p)) {
-            ItemStack[] inv = p.getInventory().getContents();
-            ItemStack[] equip = p.getInventory().getArmorContents();
-            ItemStack[] extra = p.getInventory().getExtraContents();
-            disabledPlayers.put(p, new PlayerInventoryEquipment(inv, equip, extra));
-            p.getInventory().clear();
-            p.addPotionEffects(potionEffects);
-            BukkitTask task = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    p.kickPlayer(kickMsg);
-                }
-            }.runTaskLater(plugin, kickDelay); // kick after 1.5 minutes
-            taskMap.putIfAbsent(p, task);
-        }
+        // Disable the player 1 tick after joining
+        Bukkit.getScheduler().runTaskLater(SpigotEnforceOA.getInstance(), () -> {
+            if (!disabledPlayers.containsKey(p)) {
+                ItemStack[] inv = p.getInventory().getContents();
+                ItemStack[] equip = p.getInventory().getArmorContents();
+                ItemStack[] extra = p.getInventory().getExtraContents();
+                disabledPlayers.put(p, new PlayerInventoryEquipment(inv, equip, extra));
+                p.getInventory().clear();
+                p.addPotionEffects(potionEffects);
+                BukkitTask task = new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        p.kickPlayer(kickMsg);
+                    }
+                }.runTaskLater(plugin, kickDelay); // kick after 1.5 minutes
+                taskMap.putIfAbsent(p, task);
+            }
+        }, 1L);
     }
 
     public void disablePlayer(Player p, String url) {
